@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olympic & Paralympic Medals 2024</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .medal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .medal-table th, .medal-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .medal-table th {
+            background-color: #f2f2f2;
+        }
+        .search-container {
+            margin: 20px 0;
+        }
+        .search-input {
+            padding: 8px;
+            width: 200px;
+        }
+        .search-button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Olympic & Paralympic Medals 2024</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('olympic')">Olympic Medals</div>
+            <div class="tab" onclick="switchTab('paralympic')">Paralympic Medals</div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="countryCode" class="search-input" placeholder="Enter country code (e.g., AUS)">
+            <button onclick="searchMedals()" class="search-button">Search</button>
+        </div>
+
+        <table class="medal-table" id="medalTable">
+            <thead>
+                <tr>
+                    <th>Country</th>
+                    <th>Gold</th>
+                    <th>Silver</th>
+                    <th>Bronze</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="medalTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentTab = 'olympic';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab:nth-child(${tab === 'olympic' ? 1 : 2})`).classList.add('active');
+            searchMedals();
+        }
+
+        async function searchMedals() {
+            const countryCode = document.getElementById('countryCode').value;
+            const endpoint = currentTab === 'olympic' ? '/api/medals' : '/api/paralympics/medals';
+            const url = countryCode ? `${endpoint}?country=${countryCode}` : endpoint;
+
+            try {
+                const response = await fetch(url);
+                const medals = await response.json();
+                displayMedals(medals);
+            } catch (error) {
+                console.error('Error fetching medals:', error);
+            }
+        }
+
+        function displayMedals(medals) {
+            const tbody = document.getElementById('medalTableBody');
+            tbody.innerHTML = '';
+
+            medals.forEach(medal => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${medal.country}</td>
+                    <td>${medal.gold}</td>
+                    <td>${medal.silver}</td>
+                    <td>${medal.bronze}</td>
+                    <td>${medal.total}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Load initial data
+        searchMedals();
+    </script>
+</body>
+</html> 
